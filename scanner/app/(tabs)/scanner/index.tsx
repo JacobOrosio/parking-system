@@ -7,6 +7,7 @@ import {
     ActivityIndicator,
     Modal,
     SafeAreaView,
+    Linking,
 } from 'react-native';
 import { CameraView, Camera, BarcodeScanningResult } from 'expo-camera';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -49,8 +50,10 @@ export default function TicketScanner() {
 
     const payTicket = useMutation({
         mutationFn: payParking,
-        onSuccess: () => {
+        onSuccess: async () => {
             console.log('Successfully pay ticket:');
+            await handlePrintReceipt();
+            Alert.alert('Success', 'Successfully pay ticket');
             setScanned(false);
             setTicketId('');
             setIsProgress(false);
@@ -143,6 +146,83 @@ export default function TicketScanner() {
 
         const extraHours = hours - baseHours;
         return baseRate + extraHours * extraHourRate;
+    };
+
+    const handlePrintReceipt = async () => {
+        try {
+            const currentDate = new Date().toLocaleDateString();
+            const currentTime = new Date().toLocaleTimeString();
+            const vehicleIcon = ticketData.vehicleType === 'Car' ? '🚗' : '🏍️';
+            const entryTimeFormatted = dayjs(ticketData.entryTime).format('h:mm:ss A');
+            const exitTimeFormatted = dayjs().format('h:mm:ss A');
+            const totalFee = calculateFee();
+            const { durationText } = getDuration(ticketData.entryTime);
+
+            // Create the parking receipt text command
+            const text =
+                '\x1B\x40' + // Initialize printer
+                '\x1B\x61\x01' + // Center alignment
+                '================================\n' +
+                '\x1B\x21\x10' + // Double height text
+                'PARKING RECEIPT\n' +
+                '\x1B\x21\x00' + // Normal text
+                '================================\n' +
+                'Date: ' +
+                currentDate +
+                '\n' +
+                'Time: ' +
+                currentTime +
+                '\n' +
+                'Receipt ID: ' +
+                ticketId +
+                '\n' +
+                '================================\n' +
+                '\x1B\x61\x00' + // Left alignment
+                'Vehicle Type: ' +
+                vehicleIcon +
+                ' ' +
+                ticketData.vehicleType +
+                '\n' +
+                'Plate Number: ' +
+                ticketData.vehiclePlate.toUpperCase() +
+                '\n' +
+                'Entry Time: ' +
+                entryTimeFormatted +
+                '\n' +
+                'Exit Time: ' +
+                exitTimeFormatted +
+                '\n' +
+                'Duration: ' +
+                durationText +
+                '\n' +
+                '================================\n' +
+                '\x1B\x61\x01' + // Center alignment
+                '\x1B\x21\x08' + // Double width text
+                'TOTAL AMOUNT\n' +
+                '\x1B\x21\x20' + // Double height and width
+                '₱' +
+                totalFee.toFixed(2) +
+                '\n' +
+                '\x1B\x21\x00' + // Normal text
+                '================================\n' +
+                '\x1B\x61\x00' + // Left alignment
+                'Payment Status: PAID\n' +
+                'Payment Method: Cash\n' +
+                '\x1B\x61\x01' + // Center alignment
+                'Thank you for parking with us!\n' +
+                'Please come again.\n' +
+                '\x1D\x56\x41\x03'; // Cut paper
+
+            // Send to RawBT
+            await Linking.openURL('rawbt:' + encodeURIComponent(text));
+            Alert.alert('Success', 'Receipt sent to RawBT for printing!');
+        } catch (error) {
+            console.error(error);
+            Alert.alert(
+                'Error',
+                'Failed to send print command. Ensure RawBT is installed and printer is paired.',
+            );
+        }
     };
 
     if (hasPermission === null) {
