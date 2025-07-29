@@ -20,11 +20,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 
 export default function TicketGenerator() {
     const { user, signOut } = useSession();
-
-    const [vehiclePlate, setVehiclePlate] = useState('');
     const [vehicleType, setVehicleType] = useState<'car' | 'motorcycle'>('car');
-    const [qrValue, setQrValue] = useState('');
-    const [entryTime, setEntryTime] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [showValidation, setShowValidation] = useState(false);
     const vehicleTypeOptions = [
@@ -35,13 +31,13 @@ export default function TicketGenerator() {
     const createTicket = useMutation({
         mutationFn: customerParking,
         onSuccess: async (data) => {
-            setQrValue(data.ticket.id);
-            setEntryTime(dayjs(data.ticket.entryTime).format('YYYY-MM-DD HH:mm:ss'));
-            setModalVisible(true);
             setShowValidation(false);
-            await handlePrintTicket();
-            setVehiclePlate('');
+            await handlePrintTicket(
+                data.ticket.id,
+                dayjs(data.ticket.entryTime).format('YYYY-MM-DD HH:mm:ss'),
+            );
             console.log('Successfully created ticket:', data.ticket.id);
+            Alert.alert('Success', 'QR Code Successfully Printed!');
         },
         onError: (error) => {
             console.error('Failed to create ticket:', error);
@@ -49,22 +45,15 @@ export default function TicketGenerator() {
     });
 
     const handleGenerateTicket = () => {
-        const trimmedPlate = vehiclePlate.trim();
-        if (!trimmedPlate || !vehicleType) {
-            setShowValidation(true);
-            return;
-        }
-
         if (!user) return null;
-
         createTicket.mutate({
             issuedById: user.id,
-            vehiclePlate: trimmedPlate,
             vehicleType,
         });
     };
 
-    const handlePrintTicket = async () => {
+    const handlePrintTicket = async (qrValue: string, date: string) => {
+        console.log(qrValue);
         try {
             // ESC/POS QR code command structure
             const qrCodeCommand =
@@ -87,7 +76,7 @@ export default function TicketGenerator() {
             const vehicleTypeDisplay = vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1);
 
             // Format entry time to 12-hour format without date
-            const entryTimeFormatted = dayjs(entryTime).format('h:mm:ss A');
+            const entryTimeFormatted = dayjs(date).format('h:mm:ss A');
 
             // Create the parking ticket text command
             const text =
@@ -108,9 +97,6 @@ export default function TicketGenerator() {
                 '\x1B\x61\x00' + // Left alignment
                 'Vehicle Type: ' +
                 vehicleTypeDisplay +
-                '\n' +
-                'Plate Number: ' +
-                vehiclePlate.toUpperCase() +
                 '\n' +
                 'Entry Time: ' +
                 entryTimeFormatted +
@@ -140,8 +126,6 @@ export default function TicketGenerator() {
             );
         }
     };
-
-    const isPlateValid = vehiclePlate.trim().length > 0;
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50">
@@ -177,28 +161,6 @@ export default function TicketGenerator() {
                                 </Text>
                             </View>
 
-                            <View className="mb-6">
-                                <Text className="text-base font-semibold text-gray-700 mb-2">
-                                    Vehicle Plate Number
-                                </Text>
-                                <TextInput
-                                    value={vehiclePlate}
-                                    onChangeText={setVehiclePlate}
-                                    placeholder="ABC 1234"
-                                    className={`border-2 rounded-xl px-4 py-4 bg-gray-50 text-base font-medium ${
-                                        showValidation && !isPlateValid
-                                            ? 'border-red-300 bg-red-50'
-                                            : 'border-gray-200 focus:border-orange-400'
-                                    }`}
-                                    autoCapitalize="characters"
-                                />
-                                {showValidation && !isPlateValid && (
-                                    <Text className="text-red-500 text-sm mt-1 font-medium">
-                                        Plate number is required
-                                    </Text>
-                                )}
-                            </View>
-
                             <View className="mb-8">
                                 <Text className="text-base font-semibold text-gray-700 mb-3">
                                     Vehicle Type
@@ -231,11 +193,11 @@ export default function TicketGenerator() {
                             <TouchableOpacity
                                 onPress={handleGenerateTicket}
                                 className={`py-4 rounded-xl items-center shadow-sm ${
-                                    isPlateValid && !createTicket.isPending
+                                    !createTicket.isPending
                                         ? 'bg-orange-500 active:bg-orange-600'
                                         : 'bg-gray-300'
                                 }`}
-                                disabled={!isPlateValid || createTicket.isPending}>
+                                disabled={createTicket.isPending}>
                                 <Text className="text-white text-lg font-bold">
                                     {createTicket.isPending
                                         ? 'Generating...'
@@ -252,53 +214,6 @@ export default function TicketGenerator() {
                     </View>
                 </KeyboardAvoidingView>
             </ScrollView>
-
-            <Modal visible={modalVisible} transparent animationType="slide">
-                <View className="flex-1 justify-center items-center bg-black/40 px-6">
-                    <View className="bg-white rounded-2xl shadow-xl w-full max-w-sm">
-                        <View className="bg-orange-50 px-6 py-4 rounded-t-2xl border-b border-orange-100">
-                            <Text className="text-xl font-bold text-center text-orange-900">
-                                🎟️ Parking Ticket Generated
-                            </Text>
-                        </View>
-
-                        <View className="p-6 items-center">
-                            {/* <View className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4">
-                                {qrValue && <QRCode value={qrValue} size={160} />}
-                            </View> */}
-
-                            <View className="w-full space-y-2 bg-gray-50 rounded-xl p-4">
-                                <View className="flex-row justify-between">
-                                    <Text className="text-gray-600 font-medium">Plate:</Text>
-                                    <Text className="text-gray-900 font-bold">{vehiclePlate}</Text>
-                                </View>
-                                <View className="flex-row justify-between">
-                                    <Text className="text-gray-600 font-medium">Type:</Text>
-                                    <Text className="text-gray-900 font-semibold capitalize">
-                                        {vehicleType}
-                                    </Text>
-                                </View>
-                                <View className="flex-row justify-between">
-                                    <Text className="text-gray-600 font-medium">Entry:</Text>
-                                    <Text className="text-gray-900 font-mono text-sm">
-                                        {entryTime}
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
-
-                        <View className="px-6 pb-6">
-                            <TouchableOpacity
-                                className="bg-gray-900 py-3 px-6 rounded-xl"
-                                onPress={() => setModalVisible(false)}>
-                                <Text className="text-white text-center font-semibold">
-                                    Close & Generate New Ticket
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     );
 }

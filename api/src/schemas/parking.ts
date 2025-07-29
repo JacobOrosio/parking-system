@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const createParkingTicketSchema = z.object({
   vehicleType: z.string(),
-  vehiclePlate: z.string(),
   issuedById: z.string(),
 });
 

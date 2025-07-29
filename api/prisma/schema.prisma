@@ -21,7 +21,7 @@ model User {
 
 model ParkingTicket {
   id           String      @id @default(uuid())
-  vehiclePlate String
+  vehiclePlate String?
   entryTime    DateTime    @default(now())
   exitTime     DateTime?
   totalFee     Float?

@@ -1,7 +1,6 @@
 import api from '@/utils/api';
 
 type ParkingData = {
-    vehiclePlate: string;
     issuedById: string;
     vehicleType: string;
 };

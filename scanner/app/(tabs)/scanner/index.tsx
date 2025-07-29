@@ -183,9 +183,6 @@ export default function TicketScanner() {
                 ' ' +
                 ticketData.vehicleType +
                 '\n' +
-                'Plate Number: ' +
-                ticketData.vehiclePlate.toUpperCase() +
-                '\n' +
                 'Entry Time: ' +
                 entryTimeFormatted +
                 '\n' +
@@ -392,14 +389,6 @@ export default function TicketScanner() {
                                 <>
                                     {/* Ticket Details Card */}
                                     <View className="bg-gray-50 rounded-xl p-4 mb-6">
-                                        <View className="flex-row justify-between items-center mb-3">
-                                            <Text className="text-gray-600 font-medium">
-                                                Vehicle Plate
-                                            </Text>
-                                            <Text className="text-gray-900 font-bold text-lg">
-                                                {ticketData?.vehiclePlate}
-                                            </Text>
-                                        </View>
                                         <View className="flex-row justify-between items-center mb-3">
                                             <Text className="text-gray-600 font-medium">
                                                 Vehicle Type
