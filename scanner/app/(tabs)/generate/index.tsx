@@ -37,7 +37,6 @@ export default function TicketGenerator() {
                 dayjs(data.ticket.entryTime).format('YYYY-MM-DD HH:mm:ss'),
             );
             console.log('Successfully created ticket:', data.ticket.id);
-            Alert.alert('Success', 'QR Code Successfully Printed!');
         },
         onError: (error) => {
             console.error('Failed to create ticket:', error);
@@ -53,7 +52,6 @@ export default function TicketGenerator() {
     };
 
     const handlePrintTicket = async (qrValue: string, date: string) => {
-        console.log(qrValue);
         try {
             // ESC/POS QR code command structure
             const qrCodeCommand =
@@ -117,7 +115,6 @@ export default function TicketGenerator() {
 
             // Send to RawBT
             await Linking.openURL('rawbt:' + encodeURIComponent(text));
-            Alert.alert('Success', 'Parking ticket sent to RawBT for printing!');
         } catch (error) {
             console.error(error);
             Alert.alert(

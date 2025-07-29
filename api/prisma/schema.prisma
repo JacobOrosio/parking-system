@@ -28,6 +28,9 @@ model ParkingTicket {
   checkedOut   Boolean     @default(false)
   issuedById   String
   vehicleType  String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
   log          ParkingLog?
   issuedBy     User        @relation("IssuedTickets", fields: [issuedById], references: [id])
 }
@@ -39,6 +42,8 @@ model ParkingLog {
   feeCharged     Float
   checkedOutById String
   createdAt      DateTime      @default(now())
+  updatedAt    DateTime        @updatedAt
+
   checkedOutBy   User          @relation("CheckedOutLogs", fields: [checkedOutById], references: [id])
   ticket         ParkingTicket @relation(fields: [ticketId], references: [id])
 }
