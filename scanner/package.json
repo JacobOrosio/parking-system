@@ -1,5 +1,5 @@
 {
-    "name": "mobile-template",
+    "name": "parking-system",
     "main": "expo-router/entry",
     "version": "1.0.0",
     "scripts": {

@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mobile-template",
-    "slug": "mobile-template",
+    "name": "POS Parking System",
+    "slug": "parkingsystem",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "parkingsystem",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "ios": {
@@ -13,7 +13,7 @@
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to scan QR codes"
       },
-      "bundleIdentifier": "com.pasajobexpo.mobiletemplate"
+      "bundleIdentifier": "com.jacoborosio.parkingsystem"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +24,7 @@
         "CAMERA",
         "android.permission.CAMERA"
       ],
-      "package": "com.pasajobexpo.mobiletemplate"
+      "package": "com.jacoborosio.parkingsystem"
     },
     "web": {
       "bundler": "metro",
@@ -46,6 +46,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "cde61c69-d0d9-4b59-95e6-7f53cc5fcea6"
+      }
+    },
+    "owner": "jacoborosio"
   }
 }
