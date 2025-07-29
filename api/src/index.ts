@@ -1,9 +1,9 @@
-// server.ts
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import parking from "./handlers/parking.handler.js";
 import auth from "./handlers/auth.handler.js";
 import profile from "./handlers/profile.handler.js";
+import { handle } from "@hono/node-server/vercel";
 
 const app = new Hono();
 
@@ -20,6 +20,7 @@ v1.route("/parking", parking);
 v1.route("/profile", profile);
 
 app.route("/api/v1", v1);
+
 serve(
   {
     fetch: app.fetch,
@@ -29,3 +30,5 @@ serve(
     console.log(`Server is running on http://localhost:${info.port}`);
   }
 );
+
+export default handle(app);
